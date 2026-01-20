@@ -181,26 +181,28 @@
         let dataNavegacao = new Date();
         let db = [];
 
-        // Tenta carregar do banco. Se der erro, inicia vazio.
+        // Carregar dados
         try {
             db = JSON.parse(localStorage.getItem('app_lucas_final')) || [];
-        } catch (e) {
-            db = [];
+        } catch (e) { db = []; }
+
+        // Se o banco estiver vazio, tenta recuperar da versão V6 antiga pra não perder nada
+        if(db.length === 0) {
+            let dbAntigo = JSON.parse(localStorage.getItem('caderno_lucas_v6'));
+            if(dbAntigo) db = dbAntigo;
         }
 
-        // Iniciar
         document.getElementById('m-data').valueAsDate = new Date();
         render();
 
-        // --- NAVEGAÇÃO DE MÊS ---
+        // --- NAVEGAÇÃO ---
         function mudarMes(direcao) {
             dataNavegacao.setMonth(dataNavegacao.getMonth() + direcao);
             render();
         }
 
-        // --- RENDERIZAÇÃO ---
+        // --- RENDERIZAÇÃO (CORREÇÃO DO ZERO) ---
         function render() {
-            // Garante que db é sempre uma lista
             if (!Array.isArray(db)) db = [];
 
             // 1. Título do Mês
@@ -209,23 +211,33 @@
             let filtroMes = `${ano}-${String(mes+1).padStart(2, '0')}`;
             
             let nomeMes = dataNavegacao.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-            let displayMes = document.getElementById('display-mes');
-            if(displayMes) displayMes.innerText = nomeMes.toUpperCase();
+            let elMes = document.getElementById('display-mes');
+            if(elMes) elMes.innerText = nomeMes.toUpperCase();
 
-            // 2. Filtra e Calcula
+            // 2. Filtrar itens do mês
             let itensDoMes = db.filter(item => item.data && item.data.startsWith(filtroMes));
             
             let tot = 0, ent = 0, sai = 0;
+
+            // --- AQUI ESTAVA O ERRO, AGORA CORRIGIDO ---
             itensDoMes.forEach(i => { 
-                let val = parseFloat(i.val) || 0; // Proteção contra valor nulo
-                if(i.tipo==='entrada'){ tot+=val; ent+=val } else { tot-=val; sai+=val } 
+                // Ele tenta ler 'val', se não tiver, lê 'valor', se não tiver, lê 'amount'
+                let dinheiro = parseFloat(i.val || i.valor || i.amount || 0);
+
+                // Padroniza o tipo (para aceitar 'receita' ou 'entrada')
+                let tipo = i.tipo;
+                if(tipo === 'receita') tipo = 'entrada';
+                if(tipo === 'despesa') tipo = 'saida';
+
+                if(tipo === 'entrada'){ tot += dinheiro; ent += dinheiro; } 
+                else { tot -= dinheiro; sai += dinheiro; } 
             });
 
             document.getElementById('dash-saldo').innerText = tot.toFixed(2);
             document.getElementById('dash-ent').innerText = ent.toFixed(2);
             document.getElementById('dash-sai').innerText = sai.toFixed(2);
 
-            // 3. Agrupa e HTML
+            // 3. Agrupar por Data
             let grupos = {};
             itensDoMes.forEach(i => {
                 if(!grupos[i.data]) grupos[i.data] = [];
@@ -233,6 +245,7 @@
             });
             let datas = Object.keys(grupos).sort().reverse();
 
+            // 4. HTML
             let html = '';
             datas.forEach(data => {
                 let itens = grupos[data];
@@ -240,13 +253,18 @@
                 let linhas = '';
 
                 itens.forEach(i => {
-                    let val = parseFloat(i.val) || 0;
-                    let km = parseFloat(i.km) || 0;
+                    // Mesma correção aqui para exibir na lista
+                    let dinheiro = parseFloat(i.val || i.valor || i.amount || 0);
+                    let km = parseFloat(i.km || 0);
                     
-                    if(i.tipo==='entrada') { saldoDia += val; kmDia += km } else { saldoDia -= val; }
+                    let tipo = i.tipo;
+                    if(tipo === 'receita') tipo = 'entrada';
                     
-                    let cor = i.tipo==='entrada' ? 'var(--green)' : 'var(--red)';
-                    let sinal = i.tipo==='entrada' ? '+' : '-';
+                    if(tipo === 'entrada') { saldoDia += dinheiro; kmDia += km } 
+                    else { saldoDia -= dinheiro; }
+                    
+                    let cor = tipo === 'entrada' ? 'var(--green)' : 'var(--red)';
+                    let sinal = tipo === 'entrada' ? '+' : '-';
                     
                     linhas += `
                     <div class="txn-item">
@@ -256,7 +274,7 @@
                             <span class="txn-sub">${km ? '🚦 '+km+' km' : 'Geral'}</span>
                         </div>
                         <div style="text-align:right">
-                            <span class="txn-val" style="color:${cor}">${sinal}${val.toFixed(2)}</span>
+                            <span class="txn-val" style="color:${cor}">${sinal}${dinheiro.toFixed(2)}</span>
                             <button class="btn-del" onclick="apagar(${i.id})">&times;</button>
                         </div>
                     </div>`;
@@ -282,12 +300,11 @@
             let vazio = '<div style="text-align:center; padding:30px; color:#aaa">Sem lançamentos neste mês.</div>';
             let elHome = document.getElementById('lista-home');
             let elFull = document.getElementById('lista-full');
-            
             if(elHome) elHome.innerHTML = html || vazio;
             if(elFull) elFull.innerHTML = html || vazio;
         }
 
-        // --- FUNÇÕES GERAIS ---
+        // --- FUNÇÕES DE SISTEMA ---
         function nav(pag, btn) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('pg-'+pag).classList.add('active');
@@ -313,8 +330,9 @@
             let val = parseFloat(document.getElementById('m-val').value);
             let km = parseFloat(document.getElementById('m-km').value) || 0;
             
-            if(!desc || !val) return alert('Preencha descrição e valor!');
+            if(!desc || !val) return alert('Preencha os campos!');
 
+            // Salva usando 'val' (padrão novo), mas o render lê 'valor' também se precisar
             db.unshift({
                 id: Date.now(),
                 data: document.getElementById('m-data').value,
@@ -328,13 +346,13 @@
             document.getElementById('m-val').value = '';
             document.getElementById('m-km').value = '';
             
-            let dataLanc = new Date(document.getElementById('m-data').value + 'T00:00');
-            dataNavegacao = dataLanc; 
+            // Vai para o mês do lançamento
+            dataNavegacao = new Date(document.getElementById('m-data').value + 'T00:00');
             render();
         }
 
         function apagar(id) {
-            if(confirm('Apagar registro?')) {
+            if(confirm('Apagar?')) {
                 db = db.filter(i => i.id !== id);
                 localStorage.setItem('app_lucas_final', JSON.stringify(db));
                 render();
@@ -342,62 +360,28 @@
         }
 
         function baixarBackup() {
-            let dadosJson = JSON.stringify(db);
-            let blob = new Blob([dadosJson], {type: "application/json"});
+            let blob = new Blob([JSON.stringify(db)], {type: "application/json"});
             let url = URL.createObjectURL(blob);
-            let a = document.createElement('a'); 
-            a.href = url; 
-            a.download = "backup_lucas_" + new Date().toISOString().slice(0,10) + ".json";
-            document.body.appendChild(a); 
-            a.click(); 
-            document.body.removeChild(a);
+            let a = document.createElement('a'); a.href = url; a.download = "backup_lucas_v11.json";
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
 
-        // --- CORREÇÃO DO RESTAURAR (MAIS ROBUSTO) ---
         function restaurarBackup(input) {
             let file = input.files[0];
             if(!file) return;
-
             let reader = new FileReader();
-            
             reader.onload = function(e) {
                 try {
-                    let conteudo = e.target.result;
-                    
-                    // 1. Verifica se está vazio
-                    if (!conteudo || conteudo.trim() === "") {
-                        alert("O arquivo selecionado está vazio!");
-                        return;
-                    }
-
-                    // 2. Tenta converter o texto para dados (JSON)
-                    let dadosCarregados = JSON.parse(conteudo);
-
-                    // 3. Verifica se é uma lista válida
-                    if (Array.isArray(dadosCarregados)) {
-                        let confirmacao = confirm(`Encontrei ${dadosCarregados.length} registros no arquivo. Deseja substituir os dados atuais por estes?`);
-                        
-                        if(confirmacao) {
-                            db = dadosCarregados;
-                            localStorage.setItem('app_lucas_final', JSON.stringify(db));
-                            render();
-                            alert("Sucesso! Dados restaurados.");
-                        }
-                    } else {
-                        alert("O arquivo não contém uma lista válida de transações.");
-                    }
-                } catch(erro) {
-                    console.error(erro);
-                    alert("Erro ao ler o arquivo. Verifique se é um arquivo .JSON válido.");
-                }
+                    let dados = JSON.parse(e.target.result);
+                    if(Array.isArray(dados)) {
+                        db = dados;
+                        localStorage.setItem('app_lucas_final', JSON.stringify(db));
+                        render();
+                        alert('Restaurado com sucesso! Os valores devem aparecer agora.');
+                    } else { alert('Arquivo inválido'); }
+                } catch(e) { alert('Erro ao ler arquivo'); }
             };
-            
-            reader.onerror = function() {
-                alert("Erro ao ler o arquivo do dispositivo.");
-            };
-
             reader.readAsText(file);
-            input.value = ''; // Limpa para permitir selecionar o mesmo arquivo se errar
         }
     </script>
 </body>
