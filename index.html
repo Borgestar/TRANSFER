@@ -3,335 +3,345 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Transfer Pro - Gestão</title>
-
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1e3c72">
-    <link rel="apple-touch-icon" href="icon.png">
-
+    <title>Gestão transfer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        /* --- ESTILOS GERAIS (PREMIUM LOOK) --- */
-        :root {
-            --primary: #1e3c72;
-            --primary-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            --green: #27ae60;
-            --red: #e74c3c;
-            --bg: #f4f7f6;
-            --card: #ffffff;
-            --text: #333;
-            --text-light: #7f8c8d;
-        }
+        /* --- ESTILOS GERAIS --- */
+        :root { --primary: #2962ff; --bg: #f2f4f7; --text: #1a1a1a; --green: #00c853; --red: #d50000; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { margin: 0; padding: 0; background: var(--bg); color: var(--text); padding-bottom: 80px; height: 100vh; overflow: hidden; }
 
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); padding: 15px; max-width: 550px; margin: auto; color: var(--text); padding-bottom: 40px; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        /* HEADER */
+        .app-header { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+        .user h1 { margin: 0; font-size: 18px; font-weight: 800; color: #333; }
+        .user p { margin: 0; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* --- 1. CABEÇALHO (SALDO) --- */
-        .header-card {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 25px 20px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 10px 20px rgba(30, 60, 114, 0.2);
-            margin-bottom: 25px;
-            position: relative;
-            overflow: hidden;
-        }
-        /* Efeito de brilho no fundo */
-        .header-card::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%); pointer-events: none; }
+        /* NAVEGADOR DE MÊS (NOVIDADE) */
+        .month-nav { display: flex; align-items: center; justify-content: space-between; background: white; margin: 15px 0; padding: 10px 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+        .btn-month { background: none; border: none; font-size: 18px; color: var(--primary); padding: 10px; cursor: pointer; }
+        .current-month { font-weight: 800; text-transform: uppercase; color: #333; font-size: 14px; }
 
-        .label-total { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.8; margin-bottom: 5px; }
-        .valor-total { font-size: 42px; font-weight: 700; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        
-        .resumo-grid { display: grid; grid-template-columns: 1fr 1px 1fr; gap: 10px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 12px; align-items: center; }
-        .resumo-item span { display: block; }
-        .resumo-label { font-size: 10px; opacity: 0.9; margin-bottom: 2px; }
-        .resumo-val { font-size: 16px; font-weight: 600; }
-        .divider { background: rgba(255,255,255,0.2); height: 30px; }
+        /* PAGE SYSTEM */
+        .page { display: none; height: 100%; overflow-y: auto; padding: 15px; padding-bottom: 120px; } /* Padding maior embaixo pra não cortar conteúdo */
+        .page.active { display: block; animation: fadeIn 0.3s; }
 
-        /* --- 2. FORMULÁRIO (INPUTS) --- */
-        .form-card { background: var(--card); padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        
-        .input-row { display: flex; gap: 12px; margin-bottom: 12px; }
-        .input-group { flex: 1; }
-        
-        label { display: block; font-size: 11px; color: var(--text-light); font-weight: 600; margin-bottom: 5px; text-transform: uppercase; }
-        input { width: 100%; padding: 14px; border: 1px solid #e0e0e0; border-radius: 10px; font-size: 16px; background: #fafafa; transition: 0.3s; outline: none; }
-        input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1); }
+        /* CARD SALDO */
+        .card-main { background: linear-gradient(135deg, #2962ff 0%, #1565c0 100%); color: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(41,98,255,0.25); margin-bottom: 25px; text-align: center; position: relative; overflow: hidden; }
+        .card-main::after { content:''; position: absolute; top:-50%; right:-50%; width:200%; height:200%; background: radial-gradient(circle, rgba(255,255,255,0.1), transparent); }
+        .val-saldo { font-size: 38px; font-weight: 700; margin: 10px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .stats-row { display: flex; justify-content: center; gap: 15px; font-size: 13px; background: rgba(0,0,0,0.15); padding: 8px; border-radius: 10px; margin-top: 10px; }
 
-        .btn-row { display: flex; gap: 10px; margin-top: 5px; }
-        .btn-action { flex: 1; padding: 16px; border: none; border-radius: 12px; font-size: 14px; font-weight: bold; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn-action:active { transform: scale(0.97); }
-        .btn-green { background: var(--green); }
-        .btn-red { background: var(--red); }
+        /* BOTÕES DE AÇÃO */
+        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+        .btn-big { background: white; border: none; padding: 15px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; font-weight: 600; color: #444; box-shadow: 0 4px 10px rgba(0,0,0,0.03); cursor: pointer; transition: 0.1s; }
+        .btn-big:active { transform: scale(0.98); }
+        .btn-big i { font-size: 20px; padding: 12px; border-radius: 50%; }
+        .ico-up { background: #e8f5e9; color: var(--green); }
+        .ico-down { background: #ffebee; color: var(--red); }
 
-        /* --- 3. LISTA (DIÁRIO) --- */
-        .section-title { font-size: 14px; color: var(--text-light); font-weight: 700; text-transform: uppercase; margin-bottom: 15px; margin-left: 5px; letter-spacing: 0.5px; }
+        /* LISTA DIÁRIA */
+        .day-group { background: white; border-radius: 16px; overflow: hidden; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .day-header { background: #f8f9fa; padding: 12px 15px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .day-date { font-weight: 700; font-size: 14px; color: #333; }
+        .day-total { font-weight: 700; font-size: 13px; }
         
-        .day-card { background: var(--card); border-radius: 16px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); overflow: hidden; animation: fadeIn 0.4s ease; border: 1px solid rgba(0,0,0,0.03); }
-        
-        .day-header { background: #f8f9fa; padding: 12px 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .day-date { font-weight: 700; color: var(--primary); font-size: 15px; }
-        .day-week { font-weight: 400; color: var(--text-light); font-size: 12px; margin-left: 5px; }
-        .day-balance { font-weight: 700; font-size: 14px; }
-        
-        .day-stats { padding: 8px 15px; font-size: 12px; display: flex; gap: 15px; color: var(--text-light); border-bottom: 1px dashed #eee; background: #fff; }
-        
-        .txn-list { list-style: none; padding: 0; margin: 0; }
-        .txn-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #f1f1f1; position: relative; }
-        .txn-item:last-child { border-bottom: none; }
-        
-        /* Indicador colorido na esquerda */
-        .txn-indicator { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
-        
-        .txn-info { padding-left: 8px; }
-        .txn-desc { font-weight: 600; font-size: 15px; display: block; color: var(--text); }
-        .txn-sub { font-size: 12px; color: var(--text-light); margin-top: 3px; display: block; }
-        
-        .txn-actions { display: flex; align-items: center; gap: 10px; }
+        .txn-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #f5f5f5; position: relative; }
+        .txn-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+        .txn-desc { font-weight: 600; font-size: 15px; display: block; color: #333; }
+        .txn-sub { font-size: 12px; color: #999; margin-top: 3px; }
         .txn-val { font-weight: 700; font-size: 15px; }
-        .btn-del { background: none; border: none; color: #ccc; font-size: 18px; padding: 5px; cursor: pointer; }
-        .btn-del:hover { color: var(--red); }
+        .btn-del { background: none; border: none; color: #ddd; padding: 5px 10px; font-size: 18px; }
 
-        /* --- 4. ÁREA DE FERRAMENTAS (BACKUP) --- */
-        .tools-section { margin-top: 30px; background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #e0e0e0; }
-        .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        /* NAVEGAÇÃO BOTTOM */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 90; }
+        .nav-item { background: none; border: none; color: #ccc; display: flex; flex-direction: column; align-items: center; font-size: 10px; gap: 4px; font-weight: 500; }
+        .nav-item.active { color: var(--primary); font-weight: 700; }
+        .nav-item i { font-size: 20px; }
+
+        /* RODAPÉ */
+        .footer-brand { text-align: center; margin-top: 30px; padding: 20px; background: #222; color: #666; border-radius: 16px; font-size: 12px; }
+        .footer-brand strong { color: white; font-size: 14px; display: block; margin-bottom: 5px; }
+        .footer-link { color: #2962ff; text-decoration: none; font-weight: bold; font-size: 14px; display: block; margin-top: 10px; }
         
-        .btn-tool { background: #fff; border: 2px solid #e0e0e0; color: var(--text-light); padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: 0.2s; }
-        .btn-tool span { font-size: 18px; }
-        .btn-tool:hover { border-color: var(--primary); color: var(--primary); background: #f0f4ff; }
+        .tools-card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; text-align: center; }
+        .btn-tool { width: 100%; background: #f5f5f5; border: 1px solid #eee; padding: 15px; border-radius: 12px; margin-bottom: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; color: #555; }
 
-        /* --- 5. RODAPÉ (FOOTER) --- */
-        .app-footer { margin-top: 40px; background: #222; color: #888; padding: 30px 20px; border-radius: 20px 20px 0 0; text-align: center; }
-        .footer-brand { color: #fff; font-size: 14px; font-weight: bold; margin-bottom: 5px; letter-spacing: 1px; }
-        .footer-link { display: inline-block; background: rgba(255,255,255,0.1); color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 50px; margin-top: 15px; font-weight: 600; font-size: 14px; transition: 0.3s; }
-        .footer-link:hover { background: var(--green); transform: translateY(-2px); }
+        /* MODAL */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: flex-end; }
+        .modal.open { display: flex; animation: slideUp 0.3s; }
+        .modal-content { background: white; width: 100%; padding: 25px; border-radius: 25px 25px 0 0; }
+        input { width: 100%; padding: 16px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 12px; background: #f9f9f9; font-size: 16px; }
+        .btn-confirm { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; color: white; font-size: 16px; margin-top: 10px; }
 
-        /* Aux */
-        .color-green { color: var(--green); }
-        .color-red { color: var(--red); }
+        @keyframes fadeIn { from {opacity:0} to {opacity:1} }
+        @keyframes slideUp { from {transform: translateY(100%)} to {transform: translateY(0)} }
         #fileInput { display: none; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
     </style>
 </head>
 <body>
 
-    <div class="header-card">
-        <div class="label-total">LUCRO LÍQUIDO TOTAL</div>
-        <div id="saldo-total" class="valor-total">R$ 0,00</div>
-        
-        <div class="resumo-grid">
-            <div class="resumo-item">
-                <span class="resumo-label">ENTRADAS</span>
-                <span id="tot-ent" class="resumo-val color-green">R$ 0,00</span>
+    <div id="pg-home" class="page active">
+        <div class="app-header">
+            <div class="user">
+                <p></p>
+                <h1>Gestão transfer</h1>
             </div>
-            <div class="divider"></div>
-            <div class="resumo-item">
-                <span class="resumo-label">SAÍDAS</span>
-                <span id="tot-sai" class="resumo-val color-red">R$ 0,00</span>
+            <i class="fas fa-taxi" style="color:var(--primary); font-size:24px"></i>
+        </div>
+
+        <div class="month-nav">
+            <button class="btn-month" onclick="mudarMes(-1)"><i class="fas fa-chevron-left"></i></button>
+            <span id="display-mes" class="current-month">JANEIRO 2026</span>
+            <button class="btn-month" onclick="mudarMes(1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+
+        <div class="card-main">
+            <div style="font-size: 11px; opacity: 0.8; letter-spacing: 1px;">LUCRO DO MÊS</div>
+            <div class="val-saldo">R$ <span id="dash-saldo">0,00</span></div>
+            <div class="stats-row">
+                <span>Entrou: <b id="dash-ent" style="color:#a5d6a7">0</b></span>
+                <span style="border-left:1px solid rgba(255,255,255,0.3); margin:0 5px"></span>
+                <span>Saiu: <b id="dash-sai" style="color:#ef9a9a">0</b></span>
             </div>
         </div>
+
+        <div class="actions-grid">
+            <button class="btn-big" onclick="abrirModal('entrada')">
+                <i class="fas fa-arrow-up ico-up"></i>
+                <span>Receita</span>
+            </button>
+            <button class="btn-big" onclick="abrirModal('saida')">
+                <i class="fas fa-arrow-down ico-down"></i>
+                <span>Despesa</span>
+            </button>
+        </div>
+
+        <div style="font-weight:bold; color:#666; margin-bottom:10px; font-size:14px">Movimentação do Mês</div>
+        <div id="lista-home"></div>
     </div>
 
-    <div class="form-card">
-        <div class="input-row">
-            <div class="input-group">
-                <label>Data</label>
-                <input type="date" id="data">
-            </div>
-            <div class="input-group">
-                <label>KM (Opcional)</label>
-                <input type="number" id="km" placeholder="0" inputmode="decimal">
-            </div>
+    <div id="pg-extrato" class="page">
+        <div class="app-header">
+            <h1>Extrato (Mês Atual)</h1>
         </div>
-
-        <label>Descrição</label>
-        <input type="text" id="desc" placeholder="Ex: Corrida Barra, Gasolina...">
-
-        <label>Valor (R$)</label>
-        <input type="number" id="valor" placeholder="0,00" inputmode="decimal" step="0.01">
-
-        <div class="btn-row">
-            <button class="btn-action btn-green" onclick="lancar('entrada')">
-                <span>💰</span> RECEBI
-            </button>
-            <button class="btn-action btn-red" onclick="lancar('saida')">
-                <span>💸</span> GASTEI
-            </button>
-        </div>
+        <div id="lista-full" style="padding-top:15px"></div>
     </div>
 
-    <div class="section-title">Histórico de Atividades</div>
-    <div id="container-historico">
+    <div id="pg-perfil" class="page">
+        <div class="app-header">
+            <h1>Sistema</h1>
+        </div>
+        
+        <div class="tools-card">
+            <h3>Backup Geral</h3>
+            <p style="font-size:12px; color:#666; margin-bottom:20px">Isso salva o histórico de <b>todos os meses</b>.</p>
+            <button class="btn-tool" onclick="baixarBackup()"><i class="fas fa-cloud-download-alt"></i> Baixar Cópia</button>
+            <button class="btn-tool" onclick="document.getElementById('fileInput').click()"><i class="fas fa-sync-alt"></i> Restaurar</button>
+            <input type="file" id="fileInput" onchange="restaurarBackup(this)">
         </div>
 
-    <div class="section-title" style="margin-top: 30px;">Ferramentas do Sistema</div>
-    <div class="tools-section">
-        <div class="tools-grid">
-            <button class="btn-tool" onclick="baixarBackup()">
-                <span>☁️</span> Baixar Backup
-            </button>
-            <button class="btn-tool" onclick="document.getElementById('fileInput').click()">
-                <span>📂</span> Restaurar Dados
-            </button>
-        </div>
-        <input type="file" id="fileInput" onchange="restaurarBackup(this)">
-        <p style="text-align:center; font-size:10px; color:#999; margin-top:10px">
-            Salve seus dados periodicamente para não perder.
-        </p>
+        <footer class="footer-brand">
+            Desenvolvido por<br><strong>LUCAS BORGES</strong>
+            <div style="border-top:1px solid #444; margin:15px 0"></div>
+            <a href="tel:5521979779313" class="footer-link">📞 (21) 979779313</a>
+            <div style="margin-top:10px; font-size:10px">Versão 10.0 Mensal</div>
+        </footer>
     </div>
 
-    <footer class="app-footer">
-        <div class="footer-brand">LUCAS BORGES</div>
-        <div style="font-size: 11px; opacity: 0.6;">SISTEMA DE GESTÃO DE TRANSFER</div>
-        
-        <a href="tel:5521979779313" class="footer-link">
-            📞 Falar com Suporte (21) 979779313
-        </a>
-        
-        <div style="margin-top: 20px; font-size: 10px; color: #555;">
-            Versão 7.0 Ultimate &bull; Todos os direitos reservados
+    <div class="bottom-nav">
+        <button class="nav-item active" onclick="nav('home', this)">
+            <i class="fas fa-home"></i> Início
+        </button>
+        <button class="nav-item" onclick="nav('extrato', this)">
+            <i class="fas fa-file-invoice-dollar"></i> Extrato
+        </button>
+        <button class="nav-item" onclick="nav('perfil', this)">
+            <i class="fas fa-cog"></i> Sistema
+        </button>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-tit" style="margin-top:0">Novo</h2>
+            <input type="date" id="m-data">
+            <input type="text" id="m-desc" placeholder="Descrição">
+            <div style="display:flex; gap:10px">
+                <input type="number" id="m-val" placeholder="R$" step="0.01" style="flex:1">
+                <input type="number" id="m-km" placeholder="KM" step="0.1" style="flex:1">
+            </div>
+            <input type="hidden" id="m-tipo">
+            <button id="btn-save" class="btn-confirm" onclick="salvar()">Confirmar</button>
+            <button onclick="document.getElementById('modal').classList.remove('open')" class="btn-confirm" style="background:#f0f0f0; color:#333; margin-top:5px">Cancelar</button>
         </div>
-    </footer>
+    </div>
 
     <script>
-        // --- INICIALIZAÇÃO ---
-        document.getElementById('data').valueAsDate = new Date();
-        // Mantendo o mesmo nome do banco para você não perder dados da V6
-        let lista = JSON.parse(localStorage.getItem('caderno_lucas_v6')) || []; 
-        atualizarTela();
+        // --- CONFIGURAÇÃO DE DATA MENSAL ---
+        let dataNavegacao = new Date(); // Começa hoje
+        let db = JSON.parse(localStorage.getItem('app_lucas_final')) || [];
 
-        // --- LÓGICA ---
-        function lancar(tipo) {
-            let data = document.getElementById('data').value;
-            let desc = document.getElementById('desc').value;
-            let valor = parseFloat(document.getElementById('valor').value);
-            let km = parseFloat(document.getElementById('km').value) || 0;
+        // Iniciar
+        document.getElementById('m-data').valueAsDate = new Date();
+        render();
 
-            if (!desc || !valor) { alert("Preencha descrição e valor!"); return; }
-
-            lista.unshift({
-                id: Date.now(), data, desc, valor, tipo, km
-            });
-
-            salvar();
-            
-            document.getElementById('desc').value = '';
-            document.getElementById('valor').value = '';
-            document.getElementById('km').value = '';
-            document.getElementById('desc').focus();
+        // --- NAVEGAÇÃO DE MÊS ---
+        function mudarMes(direcao) {
+            // Muda o mês da data de controle
+            dataNavegacao.setMonth(dataNavegacao.getMonth() + direcao);
+            render();
         }
 
-        function atualizarTela() {
-            let container = document.getElementById('container-historico');
-            container.innerHTML = '';
-            let totalMes = 0, entMes = 0, saiMes = 0;
+        // --- RENDERIZAÇÃO INTELIGENTE (FILTRA POR MÊS) ---
+        function render() {
+            // 1. Descobrir qual mês estamos vendo (YYYY-MM)
+            let ano = dataNavegacao.getFullYear();
+            let mes = dataNavegacao.getMonth(); // 0 a 11
+            let filtroMes = `${ano}-${String(mes+1).padStart(2, '0')}`;
+
+            // 2. Atualizar Título do Mês na tela
+            let nomeMes = dataNavegacao.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+            document.getElementById('display-mes').innerText = nomeMes.toUpperCase();
+
+            // 3. Filtrar o banco de dados SÓ para esse mês
+            let itensDoMes = db.filter(item => item.data.startsWith(filtroMes));
+
+            // 4. Calcular Saldo do Mês (Só dos itens filtrados)
+            let tot = 0, ent = 0, sai = 0;
+            itensDoMes.forEach(i => { if(i.tipo==='entrada'){ tot+=i.val; ent+=i.val } else { tot-=i.val; sai+=i.val } });
+
+            document.getElementById('dash-saldo').innerText = tot.toFixed(2);
+            document.getElementById('dash-ent').innerText = ent.toFixed(2);
+            document.getElementById('dash-sai').innerText = sai.toFixed(2);
+
+            // 5. Agrupar por Dias (Só dos itens filtrados)
             let grupos = {};
-            
-            // Agrupar
-            lista.forEach(item => {
-                if(item.tipo === 'entrada') { totalMes += item.valor; entMes += item.valor; }
-                else { totalMes -= item.valor; saiMes += item.valor; }
-                if (!grupos[item.data]) grupos[item.data] = [];
-                grupos[item.data].push(item);
+            itensDoMes.forEach(i => {
+                if(!grupos[i.data]) grupos[i.data] = [];
+                grupos[i.data].push(i);
             });
+            let datas = Object.keys(grupos).sort().reverse();
 
-            // Ordenar Datas
-            let datasOrdenadas = Object.keys(grupos).sort().reverse();
-
-            // Gerar HTML
-            datasOrdenadas.forEach(data => {
+            // 6. Gerar HTML
+            let html = '';
+            datas.forEach(data => {
                 let itens = grupos[data];
-                let saldoDia = 0, entDia = 0, saiDia = 0, kmDia = 0;
-                let listaHTML = '';
+                let saldoDia = 0, kmDia = 0;
+                let linhas = '';
 
-                itens.forEach(t => {
-                    if (t.tipo === 'entrada') { saldoDia += t.valor; entDia += t.valor; kmDia += t.km; }
-                    else { saldoDia -= t.valor; saiDia += t.valor; }
-
-                    let corVal = t.tipo === 'entrada' ? 'color-green' : 'color-red';
-                    let sinal = t.tipo === 'entrada' ? '+' : '-';
-                    let borderCor = t.tipo === 'entrada' ? '#27ae60' : '#e74c3c';
-                    
-                    listaHTML += `
-                        <li class="txn-item">
-                            <div class="txn-indicator" style="background:${borderCor}"></div>
-                            <div class="txn-info">
-                                <span class="txn-desc">${t.desc}</span>
-                                <span class="txn-sub">${t.km ? '🚦 ' + t.km + ' km' : 'Geral'}</span>
-                            </div>
-                            <div class="txn-actions">
-                                <span class="txn-val ${corVal}">${sinal}${t.valor.toFixed(2)}</span>
-                                <button class="btn-del" onclick="apagar(${t.id})">&times;</button>
-                            </div>
-                        </li>
-                    `;
+                itens.forEach(i => {
+                    if(i.tipo==='entrada') { saldoDia += i.val; kmDia += i.km } else { saldoDia -= i.val; }
+                    let cor = i.tipo==='entrada' ? 'var(--green)' : 'var(--red)';
+                    let sinal = i.tipo==='entrada' ? '+' : '-';
+                    linhas += `
+                    <div class="txn-item">
+                        <div class="txn-bar" style="background:${cor}"></div>
+                        <div style="flex:1">
+                            <span class="txn-desc">${i.desc}</span>
+                            <span class="txn-sub">${i.km ? '🚦 '+i.km+' km' : 'Geral'}</span>
+                        </div>
+                        <div style="text-align:right">
+                            <span class="txn-val" style="color:${cor}">${sinal}${i.val.toFixed(2)}</span>
+                            <button class="btn-del" onclick="apagar(${i.id})">&times;</button>
+                        </div>
+                    </div>`;
                 });
 
-                let [ano, mes, dia] = data.split('-');
-                let dataObj = new Date(ano, mes-1, dia);
-                let diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-                let diaSemana = diasSemana[dataObj.getDay()];
-                let corSaldo = saldoDia >= 0 ? 'color-green' : 'color-red';
+                let [Y, M, D] = data.split('-');
+                let diaSemana = new Date(Y, M-1, D).toLocaleDateString('pt-BR', {weekday:'long'});
+                let corDia = saldoDia >= 0 ? 'var(--green)' : 'var(--red)';
 
-                container.innerHTML += `
-                    <div class="day-card">
-                        <div class="day-header">
-                            <div>
-                                <span class="day-date">${dia}/${mes}</span>
-                                <span class="day-week">${diaSemana}</span>
-                            </div>
-                            <div class="day-balance ${corSaldo}">R$ ${saldoDia.toFixed(2)}</div>
+                html += `
+                <div class="day-group">
+                    <div class="day-header">
+                        <div><span class="day-date">${D}/${M}</span> <span style="font-size:12px; color:#999; text-transform:capitalize">• ${diaSemana}</span></div>
+                        <div style="text-align:right">
+                            <span class="day-total" style="color:${corDia}">R$ ${saldoDia.toFixed(2)}</span>
+                            <div style="font-size:10px; color:#999">${kmDia.toFixed(1)} km</div>
                         </div>
-                        <div class="day-stats">
-                            <span>Entrou: <b class="color-green">${entDia.toFixed(2)}</b></span>
-                            <span>Saiu: <b class="color-red">${saiDia.toFixed(2)}</b></span>
-                            <span>Rodou: <b>${kmDia.toFixed(0)} km</b></span>
-                        </div>
-                        <ul class="txn-list">${listaHTML}</ul>
                     </div>
-                `;
+                    ${linhas}
+                </div>`;
             });
 
-            document.getElementById('saldo-total').innerText = 'R$ ' + totalMes.toFixed(2);
-            document.getElementById('tot-ent').innerText = 'R$ ' + entMes.toFixed(2);
-            document.getElementById('tot-sai').innerText = 'R$ ' + saiMes.toFixed(2);
+            let vazio = '<div style="text-align:center; padding:30px; color:#aaa">Sem lançamentos neste mês.</div>';
+            document.getElementById('lista-home').innerHTML = html || vazio;
+            document.getElementById('lista-full').innerHTML = html || vazio;
+        }
+
+        // --- FUNÇÕES PADRÃO ---
+        function nav(pag, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('pg-'+pag).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+        }
+
+        function abrirModal(tipo) {
+            document.getElementById('modal').classList.add('open');
+            document.getElementById('m-tipo').value = tipo;
+            let btn = document.getElementById('btn-save');
+            if(tipo === 'entrada') {
+                document.getElementById('modal-tit').innerText = 'Nova Receita';
+                btn.style.background = 'var(--green)';
+            } else {
+                document.getElementById('modal-tit').innerText = 'Nova Despesa';
+                btn.style.background = 'var(--red)';
+            }
         }
 
         function salvar() {
-            localStorage.setItem('caderno_lucas_v6', JSON.stringify(lista));
-            atualizarTela();
+            let desc = document.getElementById('m-desc').value;
+            let val = parseFloat(document.getElementById('m-val').value);
+            let km = parseFloat(document.getElementById('m-km').value) || 0;
+            if(!desc || !val) return alert('Preencha os dados!');
+
+            db.unshift({
+                id: Date.now(),
+                data: document.getElementById('m-data').value,
+                desc, val, km,
+                tipo: document.getElementById('m-tipo').value
+            });
+            localStorage.setItem('app_lucas_final', JSON.stringify(db));
+            
+            document.getElementById('modal').classList.remove('open');
+            document.getElementById('m-desc').value = ''; 
+            document.getElementById('m-val').value = '';
+            document.getElementById('m-km').value = '';
+            
+            // Se o usuário adicionou data de outro mês, muda a visualização para lá
+            let dataLanc = new Date(document.getElementById('m-data').value + 'T00:00');
+            dataNavegacao = dataLanc; 
+            
+            render();
         }
 
         function apagar(id) {
-            if(confirm("Apagar registro?")) {
-                lista = lista.filter(i => i.id !== id);
-                salvar();
+            if(confirm('Apagar registro?')) {
+                db = db.filter(i => i.id !== id);
+                localStorage.setItem('app_lucas_final', JSON.stringify(db));
+                render();
             }
         }
 
         function baixarBackup() {
-            const blob = new Blob([JSON.stringify(lista)], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = "backup_lucas_transfer.json";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            let blob = new Blob([JSON.stringify(db)], {type: "application/json"});
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a'); a.href = url; a.download = "backup_lucas_geral.json";
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
 
         function restaurarBackup(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
+            let file = input.files[0];
+            if(!file) return;
+            let reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    lista = JSON.parse(e.target.result);
-                    salvar();
-                    alert("Dados restaurados com sucesso!");
-                } catch(err) { alert("Arquivo inválido"); }
+                    db = JSON.parse(e.target.result);
+                    localStorage.setItem('app_lucas_final', JSON.stringify(db));
+                    render();
+                    alert('Dados restaurados!');
+                } catch(e) { alert('Erro no arquivo'); }
             };
             reader.readAsText(file);
         }
